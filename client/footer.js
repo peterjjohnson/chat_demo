@@ -4,7 +4,11 @@ Template.footer.events({
         var charAscii = (typeof event.which == "number") ? event.which : event.charCode;
         if (charAscii == 13) {
             event.stopPropagation();
-            Messages.insert({ text: inputBox.val() });
+            Messages.insert({ 
+                text:      inputBox.val(),
+                user:      Meteor.userId(),
+                timestamp: Date.now()
+            });
             inputBox.val("");
             return false;
         }
