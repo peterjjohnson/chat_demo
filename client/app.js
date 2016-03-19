@@ -7,10 +7,13 @@ Template.registerHelper('usernameFromId', function(userId) {
     if (typeof user === 'undefined') {
         return 'Anonymous';
     }
+    if (typeof user.services.github !== 'undefined') {
+        return user.services.github.username;
+    }
     return user.username;
 });
 
-Template.registerHelper('timestampToTime', function(timestampe) {
+Template.registerHelper('timestampToTime', function(timestamp) {
     var date = new Date(timestamp);
     var hours = date.getHours();
     var minutes = '0' + date.getMinutes();
