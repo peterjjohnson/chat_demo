@@ -20,3 +20,12 @@ Template.registerHelper('timestampToTime', function(timestamp) {
     var seconds = '0' + date.getSeconds();
     return hours + ':' + minutes.substr(minutes.length - 2) + ':' + seconds.substr(seconds.length - 2);
 });
+
+Meteor.subscribe('messages');
+Meteor.subscribe('usernames');
+
+Messages.allow({
+    insert: function(userId, content) {
+        return (userId && content.user === userId);
+    }
+});
