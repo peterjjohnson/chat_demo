@@ -186,6 +186,11 @@ body {
   color: #ab9ba9;
 }
 
+.channel_name {
+    text-decoration: none;
+    color: inherit;
+}
+
 /* line 26, ../tests/sass/components/_listings.scss */
 .channel {
   height: 24px;
