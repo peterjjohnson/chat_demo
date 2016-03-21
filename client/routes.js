@@ -3,10 +3,11 @@ Router.configure({
 });
 
 Router.route('/', function() {
-    this.redirect('/general');
+    var user = Meteor.users.findOne({ _id: { $ne: Meteor.userId() } });
+    this.redirect('/' + user._id);
 });
 
-Router.route('/:channel', function() {
-    Session.set('channel', this.params.channel);
+Router.route('/:userId', function() {
+    Session.set('userId', this.params.userId);
     this.render('messages');
 });

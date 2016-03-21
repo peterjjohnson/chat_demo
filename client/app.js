@@ -40,16 +40,16 @@ Template.registerHelper('timestampToTime', function(timestamp) {
  * Helper function for listings template to return a list of channels
  */
 Template.listings.helpers({
-    channels: function() {
-        return Channels.find();
+    users: function() {
+        return Meteor.users.find({ _id: { $ne: Meteor.userId() } });
     }
 });
 
-Template.channel.helpers({
+Template.user.helpers({
     active: function() {
         var state = '';
 
-        if (Session.get('channel') === this.name) {
+        if (Session.get('userId') === this._id) {
             state = 'active';
         }
 

@@ -1,6 +1,6 @@
-Meteor.publish('messages', function(channel) {
+Meteor.publish('messages', function(username) {
     return Messages.find({
-        channel: channel
+        user: username
     });
 });
 
@@ -13,6 +13,6 @@ Meteor.publish('usernames', function() {
     });
 });
 
-Meteor.publish('channels', function() {
-   return Channels.find();
+Meteor.publish('users', function() {
+   return Meteor.users.find({});
 });

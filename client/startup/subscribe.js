@@ -1,10 +1,10 @@
 // Subscribe to our publications
-Meteor.subscribe('channels');
+Meteor.subscribe('users');
 Meteor.subscribe('usernames');
 
 Template.messages.onCreated(function() {
     var self = this;
     self.autorun(function() {
-        self.subscribe('messages', Session.get('channel'));
+        self.subscribe('messages', Session.get('userId'));
     })
 });

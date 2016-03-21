@@ -5,8 +5,8 @@ Template.footer.events({
         if (charAscii == 13) {
             event.stopPropagation();
             Meteor.call('newMessage', {
-                text:    inputBox.val(),
-                channel: Session.get('channel')
+                text: inputBox.val(),
+                user: Session.get('userId')
             });
             inputBox.val('');
             return false;

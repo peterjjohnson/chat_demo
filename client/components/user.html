@@ -1,12 +1,12 @@
-<template name="channel">
+<template name="user">
     <li class="channel {{active}}">
-        <a class="channel_name" href="/{{name}}">
+        <a class="channel_name" href="/{{_id}}">
 			<span class="unread">
 				0
 			</span>
 			<span>
 				<span class="prefix">#</span>
-				<span class="channel-name">{{name}}</span>
+				<span class="channel-name">{{usernameFromId _id}}</span>
 			</span>
         </a>
     </li>
