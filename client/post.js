@@ -6,7 +6,7 @@ Template.footer.events({
             event.stopPropagation();
             Meteor.call('newMessage', {
                 text: inputBox.val(),
-                user: Session.get('userId')
+                recipient: Session.get('userId')
             });
             inputBox.val('');
             return false;

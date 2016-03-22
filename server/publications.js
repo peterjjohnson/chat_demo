@@ -1,6 +1,9 @@
-Meteor.publish('messages', function(username) {
+Meteor.publish('messages', function(userId) {
     return Messages.find({
-        user: username
+        $or: [
+            { recipient: userId },
+            { user:      userId }
+        ]
     });
 });
 
