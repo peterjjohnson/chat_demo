@@ -1,8 +1,18 @@
 Meteor.publish('messages', function(userId) {
     return Messages.find({
         $or: [
-            { recipient: userId },
-            { user:      userId }
+            {
+                $and: [
+                    {recipient: userId},
+                    {user: this.userId}
+                ]
+            },
+            {
+                $and: [
+                    {recipient: this.userId},
+                    {user: userId}
+                ]
+            }
         ]
     });
 });

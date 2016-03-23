@@ -45,6 +45,9 @@ Template.listings.helpers({
     }
 });
 
+/**
+ * Helper function to set the active user
+ */
 Template.user.helpers({
     active: function() {
         var state = '';
