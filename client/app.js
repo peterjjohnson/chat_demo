@@ -103,7 +103,7 @@ function generateKeyPair() {
         window.crypto.subtle.exportKey(
             'pkcs8', keyPair.privateKey
         ).then(function (privateKey) {
-            $('private-key').val(keyToBase64(privateKey));
+            $('#private-key').val(keyToBase64(privateKey));
         });
     });
 }
