@@ -69,7 +69,7 @@ function encrypt(message) {
 function decrypt(message) {
     window.crypto.subtle.importKey(
         'pkcs8',
-        base64ToByteArray($('private-key').val()),
+        base64ToByteArray($('#private-key').val()),
         {name: 'RSA-OAEP', hash: 'SHA-256'},
         false,
         ['decrypt']
@@ -176,8 +176,8 @@ Template.footer.events({
         var charAscii = (typeof event.which == 'number') ? event.which : event.charCode;
         if (charAscii == 13) {
             event.stopPropagation();
-            //encrypt({text: inputBox.val(), recipient: Session.get('userId')});
-            Meteor.call('newMessage', {text: inputBox.val(), recipient: Session.get('userId')});
+            encrypt({text: inputBox.val(), recipient: Session.get('userId')});
+            //Meteor.call('newMessage', {text: inputBox.val(), recipient: Session.get('userId')});
             inputBox.val('');
             return false;
         }
@@ -192,7 +192,5 @@ Accounts.onLogin(function() {
     var publicKey = Meteor.call('getPublicKey', Meteor.userId());
     if (!publicKey) {
         generateKeyPair();
-    } else {
-        console.log(publicKey);
     }
 });
