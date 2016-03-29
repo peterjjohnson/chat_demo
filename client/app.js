@@ -1,3 +1,113 @@
+function byteArrayToBase64(byteArray){
+    var binaryString = "";
+    for (var i = 0; i < byteArray.byteLength; i++){
+        binaryString += String.fromCharCode(byteArray[i]);
+    }
+    return window.btoa(binaryString);
+}
+
+function base64ToByteArray(base64String){
+    var binaryString = window.atob(base64String);
+    var byteArray = new Uint8Array(binaryString.length);
+    for (var i = 0; i < binaryString.length; i++){
+        byteArray[i] += binaryString.charCodeAt(i);
+    }
+    return byteArray;
+}
+
+function byteArrayToString(byteArray){
+    if ("TextDecoder" in window) {
+        var decoder = new window.TextDecoder;
+        return decoder.decode(byteArray);
+    }
+
+    // Otherwise, fall back to 7-bit ASCII only
+    var result = "";
+    for (var i = 0; i < byteArray.byteLength; i++){
+        result += String.fromCharCode(byteArray[i])
+    }
+    return result;
+}
+
+function stringToByteArray(s){
+    if ("TextEncoder" in window) {
+        var encoder = new window.TextEncoder;
+        return encoder.encode(s);
+    }
+
+    // Otherwise, fall back to 7-bit ASCII only
+    var result = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++){
+        result[i] = s.charCodeAt(i);
+    }
+    return result;
+}
+
+function keyToBase64(key) {
+    return byteArrayToBase64(new Uint8Array(key));
+}
+
+function encrypt(message) {
+    window.crypto.subtle.importKey(
+        'spki',
+        base64ToByteArray(Meteor.call('getPublicKey', message.recipient)),
+        {name: 'RSA-OAEP', hash: 'SHA-256'},
+        false,
+        ['encrypt']
+    ).then(function(publicKey) {
+        window.crypto.subtle.encrypt(
+            {name: 'RSA-OAEP'},
+            publicKey,
+            message.text
+        ).then(function(cipherText) {
+            message.text = byteArrayToBase64(new Uint8Array(cipherText));
+            Meteor.call('newMessage', message);
+        });
+    });
+}
+
+function decrypt(message) {
+    window.crypto.subtle.importKey(
+        'pkcs8',
+        base64ToByteArray($('private-key').val()),
+        {name: 'RSA-OAEP', hash: 'SHA-256'},
+        false,
+        ['decrypt']
+    ).then(function(privateKey) {
+        window.crypto.subtle.decrypt(
+            {name: 'RSA-OAEP'},
+            privateKey,
+            base64ToByteArray(message.text)
+        ).then(function(plainText) {
+            message.text = new Uint8Array(plainText);
+        });
+    });
+}
+
+function generateKeyPair() {
+    window.crypto.subtle.generateKey(
+        {
+            name: 'RSA-OAEP',
+            modulusLength: 2048,
+            publicExponent: new Uint8Array([1, 0, 1]), // 65537
+            hash: {name: 'SHA-256'}
+        },
+        true,
+        ['encrypt', 'decrypt']
+    ).then(function(keyPair) {
+        window.crypto.subtle.exportKey(
+            'spki', keyPair.publicKey
+        ).then(function(publicKey) {
+            Meteor.call('storePublicKey', keyToBase64(publicKey));
+        });
+        window.crypto.subtle.exportKey(
+            'pkcs8', keyPair.privateKey
+        ).then(function (privateKey) {
+            $('private-key').val(keyToBase64(privateKey));
+        });
+    });
+}
+
 /**
  * Helper function for messages template to return a list of messages
  */
@@ -57,5 +167,32 @@ Template.user.helpers({
         }
 
         return state;
+    }
+});
+
+Template.footer.events({
+    'keypress input': function(event) {
+        var inputBox = $('.input-box_text');
+        var charAscii = (typeof event.which == 'number') ? event.which : event.charCode;
+        if (charAscii == 13) {
+            event.stopPropagation();
+            //encrypt({text: inputBox.val(), recipient: Session.get('userId')});
+            Meteor.call('newMessage', {text: inputBox.val(), recipient: Session.get('userId')});
+            inputBox.val('');
+            return false;
+        }
+    }
+});
+
+Accounts.ui.config({
+    passwordSignupFields: 'USERNAME_AND_EMAIL'
+});
+
+Accounts.onLogin(function() {
+    var publicKey = Meteor.call('getPublicKey', Meteor.userId());
+    if (!publicKey) {
+        generateKeyPair();
+    } else {
+        console.log(publicKey);
     }
 });

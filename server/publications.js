@@ -1,5 +1,5 @@
 Meteor.publish('messages', function(userId) {
-    return Messages.find({
+    var messages = Messages.find({
         $or: [
             {
                 recipient: userId,
@@ -11,6 +11,8 @@ Meteor.publish('messages', function(userId) {
             }
         ]
     });
+    
+    return messages;
 });
 
 Meteor.publish('usernames', function() {
@@ -23,5 +25,5 @@ Meteor.publish('usernames', function() {
 });
 
 Meteor.publish('users', function() {
-   return Meteor.users.find({});
+   return Meteor.users.find();
 });
