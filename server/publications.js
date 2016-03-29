@@ -11,7 +11,6 @@ Meteor.publish('messages', function(userId) {
             }
         ]
     });
-    messages.forEach(decrypt);
     return messages;
 });
 

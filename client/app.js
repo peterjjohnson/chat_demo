@@ -59,7 +59,7 @@ function encrypt(message) {
             {name: 'RSA-OAEP'},
             publicKey,
             message.text
-        ).then(function(cipherText) {
+        ).then(function(cipherText) { console.log(cipherText);
             message.text = byteArrayToBase64(new Uint8Array(cipherText));
             Meteor.call('newMessage', message);
         });
@@ -67,6 +67,7 @@ function encrypt(message) {
 }
 
 function decrypt(message) {
+    console.log(message);
     window.crypto.subtle.importKey(
         'pkcs8',
         base64ToByteArray($('#private-key').val()),
@@ -113,7 +114,9 @@ function generateKeyPair() {
  */
 Template.messages.helpers({
     messages: function() {
-        return Messages.find();
+        var messages = Messages.find();
+        messages.forEach(decrypt);
+        return messages;
     }
 });
 
