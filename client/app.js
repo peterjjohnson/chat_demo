@@ -1,5 +1,3 @@
-var decryptionReady = false;
-
 function byteArrayToBase64(byteArray){
     var binaryString = "";
     for (var i = 0; i < byteArray.byteLength; i++){
@@ -135,11 +133,6 @@ Template.registerHelper('usernameFromId', function(userId) {
     return username;
 });
 
-Template.registerHelper('publicKeyFromUserId', function(userId) {
-    var user = Meteor.users.findOne({_id: userId}, {fields: {publicKey: 1}});
-    return user.publicKey;
-});
-
 /**
  * Given a timestamp, return a time string in the format hh:mm:ss
  */
@@ -157,17 +150,16 @@ Template.registerHelper('timestampToTime', function(timestamp) {
  */
 Template.messages.helpers({
     messages: function() {
-        var messages = Messages.find();
-        return messages;
+        return Messages.find();
     }
 });
 
 /**
- * Helper function for listings template to return a list of channels
+ * Helper function for listings template to return a list of users
  */
 Template.listings.helpers({
     users: function() {
-        return Meteor.users.find({ _id: { $ne: Meteor.userId() } });
+        return Meteor.users.find({ _id: { $ne: Meteor.userId() } }) || {};
     }
 });
 
@@ -207,9 +199,14 @@ Accounts.ui.config({
     passwordSignupFields: 'USERNAME_AND_EMAIL'
 });
 
+
 Accounts.onLogin(function() {
-    var publickey = Meteor.call('getPublicKey', Meteor.userId());
-    if (publicKey === undefined) {
-        generateKeyPair();
-    }
+    window.setTimeout(function() {
+        Meteor.call('getPublicKey', Meteor.userId(), function (error, publicKey) {
+            if (typeof publicKey === 'undefined') {
+                generateKeyPair();
+            }
+        });
+    }, 10);
 });
+
