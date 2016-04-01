@@ -159,7 +159,7 @@ Template.messages.helpers({
  */
 Template.listings.helpers({
     users: function() {
-        return Meteor.users.find({ _id: { $ne: Meteor.userId() } }) || {};
+        return Meteor.users.find({ _id: { $ne: Meteor.userId() } });
     }
 });
 
@@ -199,14 +199,12 @@ Accounts.ui.config({
     passwordSignupFields: 'USERNAME_AND_EMAIL'
 });
 
-
 Accounts.onLogin(function() {
-    window.setTimeout(function() {
-        Meteor.call('getPublicKey', Meteor.userId(), function (error, publicKey) {
-            if (typeof publicKey === 'undefined') {
-                generateKeyPair();
-            }
-        });
-    }, 10);
+    Meteor.call('getPublicKey', Meteor.userId(), function(error, publicKey) {
+        if (typeof publicKey === 'undefined') {
+            generateKeyPair();
+        }
+    });
+    return Meteor.user();
 });
 

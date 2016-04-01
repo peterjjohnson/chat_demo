@@ -3,8 +3,8 @@ Router.configure({
 });
 
 Router.route('/', function() {
-    if (Meteor.userId()) {
-        var user = Meteor.users.findOne({_id: {$ne: Meteor.userId()}});
+    var user = Meteor.users.findOne({_id: {$ne: Meteor.userId()}});
+    if (Meteor.userId() && user._id) {
         this.redirect('/' + user._id);
     } else {
         this.render('default');
