@@ -207,6 +207,5 @@ Accounts.onLogin(function() {
             generateKeyPair();
         }
     });
-    return Meteor.user();
 });
 
