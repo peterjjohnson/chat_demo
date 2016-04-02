@@ -150,7 +150,9 @@ Template.registerHelper('timestampToTime', function(timestamp) {
  */
 Template.messages.helpers({
     messages: function() {
-        return Messages.find();
+        var messages = Messages.find();
+        messages.forEach(decrypt);
+        return messages;
     }
 });
 
