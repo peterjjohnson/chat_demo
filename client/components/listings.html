@@ -1,13 +1,13 @@
 <template name="listings">
-    <div class="listings">
-        <div class="listings_channels">
-            <h2 class="listings_header">Users</h2>
-            <ul class="channel_list">
+    <div class="panel panel-default">
+        <div class="panel-heading">Users</div>
+        <div class="panel-body">
+            <select id="user-list" class="form-control">
+                <option>Select a user</option>
                 {{#each users}}
                     {{> user}}
                 {{/each}}
-            </ul>
+            </select>
         </div>
-        <div class="listings_direct-messages"></div>
     </div>
 </template>

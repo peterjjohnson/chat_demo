@@ -1,9 +1,7 @@
 <template name="app">
-    {{> header}}
-    <div class="main">
-        {{> loginButtons}}
-        {{> listings}}
+    <div class="container-fluid">
+        {{> header}}
         {{> yield}}
+        {{> footer}}
     </div>
-    {{> footer}}
 </template>

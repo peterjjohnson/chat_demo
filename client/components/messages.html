@@ -1,11 +1,14 @@
 <template name="messages">
-    <div class="message-history">
-        {{#if Template.subscriptionsReady}}
-            {{#each messages}}
-                {{> message}}
-            {{/each}}
-        {{else}}
-            Loading...
-        {{/if}}
+    <div class="panel panel-default">
+        <div class="panel-heading">Message History</div>
+        <div id="message-history" class="panel-body">
+            {{#if Template.subscriptionsReady}}
+                {{#each messages}}
+                    {{> message}}
+                {{/each}}
+            {{else}}
+                Loading...
+            {{/if}}
+        </div>
     </div>
 </template>

@@ -1,12 +1,21 @@
 <template name="footer">
-    <div class="footer">
-        <div class="user-menu">
-            <label for="private-key">Private Key</label>
-            <input type="text" id="private-key">
-            <input type="button" id="decrypt-messages" value="Decrypt">
+    <div class="row no-gutter">
+        <div class="col-lg-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">Private Key</div>
+                <div class="panel-body">
+                    <textarea rows="5" class="form-control" id="private-key"></textarea>
+                    <button class="btn btn-md btn-default" id="decrypt-messages">Decrypt</button>
+                </div>
+            </div>
         </div>
-        <div class="input-box">
-            <input type="text" class="input-box_text">
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-heading">Message</div>
+                <div class="panel-body">
+                    <input id="message-text" type="text" class="form-control">
+                </div>
+            </div>
         </div>
     </div>
 </template>

@@ -1,12 +1,3 @@
 <template name="user">
-    <li class="channel {{active}}">
-        <a class="channel_name" href="/{{_id}}">
-			<!--span class="unread">
-				0
-			</span-->
-			<span>
-				<span class="channel-name">{{usernameFromId _id}}</span>
-			</span>
-        </a>
-    </li>
+    <option value="{{_id}}" {{selected}}>{{usernameFromId _id}}</option>
 </template>
