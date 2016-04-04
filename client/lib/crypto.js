@@ -120,7 +120,7 @@ encrypt = function(message) {
 decrypt = function(message) {
     window.crypto.subtle.importKey(
         'pkcs8',
-        base64ToByteArray($('#private-key').val()),
+        base64ToByteArray(localStorage.getItem('pkey')),
         {name: 'RSA-OAEP', hash: 'SHA-256'},
         false,
         ['decrypt']
@@ -158,7 +158,7 @@ generateKeyPair = function() {
         window.crypto.subtle.exportKey(
             'pkcs8', keyPair.privateKey
         ).then(function(privateKey) {
-            $('#private-key').val(keyToBase64(privateKey));
+            localStorage.setItem('pkey', keyToBase64(privateKey));
         });
     });
 };

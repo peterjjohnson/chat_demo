@@ -1,7 +1,12 @@
 <template name="message">
-    <div class="message">
-        <a href="" class="message_username">{{usernameFromId user}}</a>
-        <span class="message_timestamp">{{timestampToTime timestamp}}</span>
-        <span id="{{_id}}" class="message_content">{{text}}</span>
+    <div class="col-lg-10 col-md-10 col-sm-10 {{messageClasses user 'offset'}}">
+        <div class="message panel {{messageClasses user 'panel'}}">
+            <div class="panel-heading">
+                {{usernameFromId user}} - {{timestampToTime timestamp}}
+            </div>
+            <div class="panel-body">
+                <span id="{{_id}}" class="message_content">{{text}}</span>
+            </div>
+        </div>
     </div>
 </template>

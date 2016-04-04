@@ -1,0 +1,23 @@
+body {
+    padding: 140px 0 40px;
+}
+
+.header {
+    background-color: #cdefff;
+    padding-bottom: 10px;
+}
+
+#message-history {
+    word-wrap: break-word;
+}
+
+#footer {
+    padding: 10px 0;
+    background-color: #cdefff;
+}
+
+@media (max-width: 640px) {
+    h1 {
+        font-size: 2rem;
+    }
+}

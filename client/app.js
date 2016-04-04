@@ -27,6 +27,20 @@ Template.registerHelper('timestampToTime', function(timestamp) {
     return hours + ':' + minutes.substr(minutes.length - 2) + ':' + seconds.substr(seconds.length - 2);
 });
 
+Template.registerHelper('messageClasses', function(sender, option) {
+    switch (option) {
+        case 'offset':
+            isSender = 'col-lg-push-2 col-md-push-2 col-sm-push-2';
+            isRecip  = '';
+            break;
+        case 'panel':
+            isSender = 'panel-primary';
+            isRecip  = 'panel-default';
+            break;
+    }
+    return sender == Meteor.userId() ? isSender : isRecip;
+});
+
 /**
  * Helper function for messages template to return a list of messages
  */
@@ -35,6 +49,9 @@ Template.messages.helpers({
         var messages = Messages.find();
         // Decrypt each message if we can
         messages.forEach(decrypt);
+        $('html, body').animate({
+            scrollTop: $(document).height()
+        }, 'slow');
         return messages;
     }
 });

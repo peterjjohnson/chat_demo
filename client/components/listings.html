@@ -1,13 +1,8 @@
 <template name="listings">
-    <div class="panel panel-default">
-        <div class="panel-heading">Users</div>
-        <div class="panel-body">
-            <select id="user-list" class="form-control">
-                <option>Select a user</option>
-                {{#each users}}
-                    {{> user}}
-                {{/each}}
-            </select>
-        </div>
-    </div>
+    <select id="user-list" class="form-control">
+        <option>Select a user</option>
+        {{#each users}}
+            {{> user}}
+        {{/each}}
+    </select>
 </template>

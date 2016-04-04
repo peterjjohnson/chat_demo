@@ -21,10 +21,5 @@ Template.footer.events({
             inputBox.val('');
             return false;
         }
-    },
-    // Decrypt messages on demand
-    'click #decrypt-messages': function() {
-        var messages = Messages.find();
-        messages.forEach(decrypt);
     }
 });
