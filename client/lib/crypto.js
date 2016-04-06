@@ -115,9 +115,10 @@ encrypt = function(message) {
 /**
  * Decrypt a message's text and then update the display for that message
  *
- * @param message
+ * @param cipherText
+ * @param callback
  */
-decrypt = function(message) {
+decrypt = function(cipherText, callback) {
     window.crypto.subtle.importKey(
         'pkcs8',
         base64ToByteArray(localStorage.getItem('pkey')),
@@ -128,9 +129,9 @@ decrypt = function(message) {
         window.crypto.subtle.decrypt(
             {name: 'RSA-OAEP'},
             privateKey,
-            base64ToByteArray(message.text)
+            base64ToByteArray(cipherText)
         ).then(function(decryptedText) {
-            $('#' + message._id).text(byteArrayToString(decryptedText));
+            callback(byteArrayToString(decryptedText));
         });
     });
 };

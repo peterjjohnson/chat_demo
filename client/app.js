@@ -48,7 +48,9 @@ Template.messages.helpers({
     messages: function() {
         var messages = Messages.find();
         // Decrypt each message if we can
-        messages.forEach(decrypt);
+        messages.forEach(function(message) {
+            decrypt(message.text, $('#' + message._id).text);
+        });
         $('html, body').animate({
             scrollTop: $(document).height()
         }, 'slow');
