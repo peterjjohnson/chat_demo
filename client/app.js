@@ -49,6 +49,7 @@ Template.messages.helpers({
         var messages = Messages.find();
         // Decrypt each message if we can
         messages.forEach(function(message) {
+            // Get the current user's message key so they can decrypt this message
             Meteor.call('getMyMessageKey', message, function(err, key) {
                 if (!err) {
                     decrypt(key, message.text).then(function(plainText) {

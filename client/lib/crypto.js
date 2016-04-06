@@ -89,10 +89,9 @@ keyToBase64 = function(key) {
  */
 encrypt = function(message) {
     var rawKey;
+    // Get the recipient's public key
     Meteor.call('getPublicKey', message.recipient, function(err, key) {
-        if (err) {
-            alert('error');
-        } else {
+        if (!err) {
             window.crypto.subtle.importKey(
                 'spki',
                 base64ToByteArray(key),
@@ -100,33 +99,39 @@ encrypt = function(message) {
                 false,
                 ['encrypt']
             ).then(function(publicKey) {
+                // Now we've got the public key, generate a random key for this message
                 window.crypto.subtle.generateKey(
                     {name: 'AES-CBC', length: 256},
                     true,
                     ['encrypt', 'decrypt']
                 ).then(function(messageKey) {
+                    // Generate initialisation vector and append the message at the end
                     var ivBytes = window.crypto.getRandomValues(new Uint8Array(16));
                     var oldMessage = stringToByteArray(message.text);
                     var newMessage = new Uint8Array(16 + oldMessage.length);
                     newMessage.set(ivBytes);
                     newMessage.set(oldMessage, 16);
+                    // Use the message key and IV to encrypt the message
                     window.crypto.subtle.encrypt(
                         {name: 'AES-CBC', iv: ivBytes},
                         messageKey,
                         newMessage
                     ).then(function(cipherText) {
                         message.text = byteArrayToBase64(new Uint8Array(cipherText));
+                        // Get the raw message key so we can encrypt it and store it
                         window.crypto.subtle.exportKey(
                             'raw',
                             messageKey
                         ).then(function(rawMessageKey) {
                             rawKey = rawMessageKey;
+                            // Encrypt and store the message key so the recipient can decrypt it
                             window.crypto.subtle.encrypt(
                                 {name: 'RSA-OAEP'},
                                 publicKey,
                                 rawMessageKey
                             ).then(function(encryptedMessageKey) {
                                 message.recipientKey = byteArrayToBase64(new Uint8Array(encryptedMessageKey));
+                                // Get the sender's public key
                                 Meteor.call('getPublicKey', Meteor.userId(), function(err, key) {
                                     if (!err) {
                                         window.crypto.subtle.importKey(
@@ -136,12 +141,14 @@ encrypt = function(message) {
                                             false,
                                             ['encrypt']
                                         ).then(function(publicKey) {
+                                            // Encrypt and store the message key so the sender can decrypt it
                                             window.crypto.subtle.encrypt(
                                                 {name: 'RSA-OAEP'},
                                                 publicKey,
                                                 rawKey
                                             ).then(function(encryptedKey) {
                                                 message.senderKey = byteArrayToBase64(new Uint8Array(encryptedKey));
+                                                // The message is ready to hit the server, let's store it
                                                 Meteor.call('newMessage', message);
                                             });
                                         });
@@ -163,9 +170,11 @@ encrypt = function(message) {
  * @param cipherText
  */
 decrypt = function(key, cipherText) {
+    // Split out the IV and message cipher
     cipherText = base64ToByteArray(cipherText);
     var ivBytes = new Uint8Array(cipherText.slice(0, 16));
     var cipher  = new Uint8Array(cipherText.slice(16));
+    // Get the user's private key from local storage
     return window.crypto.subtle.importKey(
         'pkcs8',
         base64ToByteArray(localStorage.getItem('pkey')),
@@ -173,6 +182,7 @@ decrypt = function(key, cipherText) {
         false,
         ['decrypt']
     ).then(function(privateKey) {
+        // Use the private key to decrypt the message key
         return window.crypto.subtle.decrypt(
             {name: 'RSA-OAEP'},
             privateKey,
@@ -185,6 +195,7 @@ decrypt = function(key, cipherText) {
                 false,
                 ['decrypt']
             ).then(function(messageKey) {
+                // Finally, use the decrypted message key and IV to decrypt the message text
                 return window.crypto.subtle.decrypt(
                     {name: 'AES-CBC', iv: ivBytes},
                     messageKey,
