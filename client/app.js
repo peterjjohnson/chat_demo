@@ -49,7 +49,13 @@ Template.messages.helpers({
         var messages = Messages.find();
         // Decrypt each message if we can
         messages.forEach(function(message) {
-            decrypt(message.text, $('#' + message._id).text);
+            Meteor.call('getMyMessageKey', message, function(err, key) {
+                if (!err) {
+                    decrypt(key, message.text).then(function(plainText) {
+                        $('#' + message._id).text(byteArrayToString(plainText));
+                    });
+                }
+            });
         });
         $('html, body').animate({
             scrollTop: $(document).height()

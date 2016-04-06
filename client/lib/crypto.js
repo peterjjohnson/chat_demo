@@ -88,6 +88,7 @@ keyToBase64 = function(key) {
  * @param message
  */
 encrypt = function(message) {
+    var rawKey;
     Meteor.call('getPublicKey', message.recipient, function(err, key) {
         if (err) {
             alert('error');
@@ -99,13 +100,56 @@ encrypt = function(message) {
                 false,
                 ['encrypt']
             ).then(function(publicKey) {
-                window.crypto.subtle.encrypt(
-                    {name: 'RSA-OAEP'},
-                    publicKey,
-                    stringToByteArray(message.text)
-                ).then(function(cipherText) {
-                    message.text = byteArrayToBase64(new Uint8Array(cipherText));
-                    Meteor.call('newMessage', message);
+                window.crypto.subtle.generateKey(
+                    {name: 'AES-CBC', length: 256},
+                    true,
+                    ['encrypt', 'decrypt']
+                ).then(function(messageKey) {
+                    var ivBytes = window.crypto.getRandomValues(new Uint8Array(16));
+                    var oldMessage = stringToByteArray(message.text);
+                    var newMessage = new Uint8Array(16 + oldMessage.length);
+                    newMessage.set(ivBytes);
+                    newMessage.set(oldMessage, 16);
+                    window.crypto.subtle.encrypt(
+                        {name: 'AES-CBC', iv: ivBytes},
+                        messageKey,
+                        newMessage
+                    ).then(function(cipherText) {
+                        message.text = byteArrayToBase64(new Uint8Array(cipherText));
+                        window.crypto.subtle.exportKey(
+                            'raw',
+                            messageKey
+                        ).then(function(rawMessageKey) {
+                            rawKey = rawMessageKey;
+                            window.crypto.subtle.encrypt(
+                                {name: 'RSA-OAEP'},
+                                publicKey,
+                                rawMessageKey
+                            ).then(function(encryptedMessageKey) {
+                                message.recipientKey = byteArrayToBase64(new Uint8Array(encryptedMessageKey));
+                                Meteor.call('getPublicKey', Meteor.userId(), function(err, key) {
+                                    if (!err) {
+                                        window.crypto.subtle.importKey(
+                                            'spki',
+                                            base64ToByteArray(key),
+                                            {name: 'RSA-OAEP', hash: 'SHA-256'},
+                                            false,
+                                            ['encrypt']
+                                        ).then(function(publicKey) {
+                                            window.crypto.subtle.encrypt(
+                                                {name: 'RSA-OAEP'},
+                                                publicKey,
+                                                rawKey
+                                            ).then(function(encryptedKey) {
+                                                message.senderKey = byteArrayToBase64(new Uint8Array(encryptedKey));
+                                                Meteor.call('newMessage', message);
+                                            });
+                                        });
+                                    }
+                                });
+                            });
+                        });
+                    });
                 });
             });
         }
@@ -113,26 +157,41 @@ encrypt = function(message) {
 };
 
 /**
- * Decrypt a message's text and then update the display for that message
+ * Pass cipher text to crypto.subtle.decrypt and return the promise of plain text
  *
+ * @param key
  * @param cipherText
- * @param callback
  */
-decrypt = function(cipherText, callback) {
-    window.crypto.subtle.importKey(
+decrypt = function(key, cipherText) {
+    cipherText = base64ToByteArray(cipherText);
+    var ivBytes = new Uint8Array(cipherText.slice(0, 16));
+    var cipher  = new Uint8Array(cipherText.slice(16));
+    return window.crypto.subtle.importKey(
         'pkcs8',
         base64ToByteArray(localStorage.getItem('pkey')),
         {name: 'RSA-OAEP', hash: 'SHA-256'},
         false,
         ['decrypt']
     ).then(function(privateKey) {
-        window.crypto.subtle.decrypt(
+        return window.crypto.subtle.decrypt(
             {name: 'RSA-OAEP'},
             privateKey,
-            base64ToByteArray(cipherText)
-        ).then(function(decryptedText) {
-            callback(byteArrayToString(decryptedText));
-        });
+            base64ToByteArray(key)
+        ).then(function(rawMessageKey) {
+            return window.crypto.subtle.importKey(
+                'raw',
+                rawMessageKey,
+                {name: 'AES-CBC', length: 256},
+                false,
+                ['decrypt']
+            ).then(function(messageKey) {
+                return window.crypto.subtle.decrypt(
+                    {name: 'AES-CBC', iv: ivBytes},
+                    messageKey,
+                    cipher
+                )
+            })
+        })
     });
 };
 
